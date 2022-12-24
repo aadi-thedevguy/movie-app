@@ -1,6 +1,7 @@
-import {useEffect, useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import MoviesList from './components/MoviesList';
+import AddMovie from './components/AddMovie';
 import './App.css';
 
 function App() {
@@ -8,49 +9,40 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const controller = new AbortController();
-  const signal = controller.signal;
-
-  const onClick = () => controller.abort()
-
   const fetchMoviesHandler = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    let data = null
     try {
       const response = await fetch('https://swapi.dev/api/films/');
       if (!response.ok) {
-        throw new Error('Something went wrong! Retrying...');
-      
+        throw new Error('Something went wrong!');
       }
 
-       data = await response.json();
+      const data = await response.json();
+      const transformedMovies = data.results.map((movieData) => {
+        return {
+          id: movieData.episode_id,
+          title: movieData.title,
+          openingText: movieData.opening_crawl,
+          releaseDate: movieData.release_date,
+        };
+      });
+      setMovies(transformedMovies);
+
     } catch (error) {
-      setInterval(async () => {
-          
-        setError(error.message);
-        const newResponse = await fetch('https://swapi.dev/api/films/', {signal});
-         data = await newResponse.json();
-         return data
-      }, 5000);
+      setError(error.message);
     }
     setIsLoading(false);
-
-    const transformedMovies = data.results.map((movieData) => {
-      return {
-        id: movieData.episode_id,
-        title: movieData.title,
-        openingText: movieData.opening_crawl,
-        releaseDate: movieData.release_date,
-      };
-    });
-    setMovies(transformedMovies);
-
   }, []);
 
   useEffect(() => {
     fetchMoviesHandler();
   }, [fetchMoviesHandler]);
+
+  async function addMovieHandler(movie) {
+
+    console.log(movie);
+  }
 
   let content = <p>Found no movies.</p>;
 
@@ -67,13 +59,15 @@ function App() {
   }
 
   return (
-    <>
+    <React.Fragment>
+      <section>
+        <AddMovie onAddMovie={addMovieHandler} />
+      </section>
       <section>
         <button onClick={fetchMoviesHandler}>Fetch Movies</button>
-        <button onClick={onClick}>Cancel Request</button>
       </section>
       <section>{content}</section>
-    </>
+    </React.Fragment>
   );
 }
 
