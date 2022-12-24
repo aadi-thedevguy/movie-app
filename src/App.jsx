@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import {useEffect, useState, useCallback } from 'react';
 
 import MoviesList from './components/MoviesList';
 import './App.css';
@@ -48,9 +48,9 @@ function App() {
 
   }, []);
 
-  // useEffect(() => {
-  //   fetchMoviesHandler();
-  // }, [fetchMoviesHandler]);
+  useEffect(() => {
+    fetchMoviesHandler();
+  }, [fetchMoviesHandler]);
 
   let content = <p>Found no movies.</p>;
 
@@ -67,13 +67,13 @@ function App() {
   }
 
   return (
-    <React.Fragment>
+    <>
       <section>
         <button onClick={fetchMoviesHandler}>Fetch Movies</button>
         <button onClick={onClick}>Cancel Request</button>
       </section>
       <section>{content}</section>
-    </React.Fragment>
+    </>
   );
 }
 
